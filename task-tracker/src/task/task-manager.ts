@@ -1,4 +1,5 @@
 import type Storage from '../storage/storage.ts';
+import { reverseStatusMap } from './task-status.ts';
 import type Task from './task.ts';
 
 export default class TaskManager {
@@ -47,6 +48,7 @@ export default class TaskManager {
 
 			if (task.status === (status ?? task.status)) {
 				tasks[taskID] = Object.assign(Object.create(null), task, {
+					status: reverseStatusMap[task.status],
 					createdAt: timeFormat.format(task.createdAt),
 					updatedAt: timeFormat.format(task.updatedAt)
 				});

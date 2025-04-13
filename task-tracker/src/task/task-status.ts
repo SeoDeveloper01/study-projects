@@ -11,3 +11,7 @@ export type StatusKey = keyof typeof StatusMap;
 export type StatusCode = (typeof StatusMap)[StatusKey];
 
 export const isStatusKey = (input: string): input is StatusKey => Object.hasOwn(StatusMap, input);
+
+export const reverseStatusMap = Object.fromEntries(
+	Object.entries(StatusMap).map(([key, value]) => [value as StatusCode, key as StatusKey])
+);
