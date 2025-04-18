@@ -64,7 +64,7 @@ export default class Commands {
 
 		if (isNaN(taskID)) throw 'Task ID must be a valid number!';
 
-		const description = parts[2] ?? '';
+		const description = parts.slice(2).join(' ');
 
 		if (description.length === 0) throw "Description can't be empty!";
 		if (description.length > 128) throw 'Description too long!';
