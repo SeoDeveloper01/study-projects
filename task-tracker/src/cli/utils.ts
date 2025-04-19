@@ -1,6 +1,9 @@
 import type { Completer } from 'node:readline/promises';
+import type { CommandKey } from './command.ts';
 
-const commands = ['add', 'delete', 'exit', 'help', 'list', 'mark', 'update'];
+export const commands = new Array<CommandKey>('add', 'delete', 'exit', 'help', 'list', 'mark', 'update');
+
+export const isCommandKey = (input: string): input is CommandKey => commands.includes(input as CommandKey);
 
 export const autocomplete: Completer = async (input: string) => {
 	const match = new Array<string>();

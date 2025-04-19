@@ -2,11 +2,14 @@ import type { Interface } from 'node:readline/promises';
 import type TaskManager from '../task/task-manager.ts';
 import { userManual } from './utils.ts';
 import StatusMap, { isStatusKey, statusList } from '../task/task-status.ts';
+import type Task from '../task/task.ts';
 
-export default class Commands {
+export default class Command {
+	private readonly readlineInterface: Interface;
 	private readonly taskManager: TaskManager;
 
-	public constructor(taskManager: TaskManager) {
+	public constructor(readlineInterface: Interface, taskManager: TaskManager) {
+		this.readlineInterface = readlineInterface;
 		this.taskManager = taskManager;
 	}
 
@@ -16,7 +19,7 @@ export default class Commands {
 		if (description.length === 0) throw "Description can't be empty!";
 		if (description.length > 128) throw 'Description too long!';
 
-		console.log(`Task (ID: ${this.taskManager.add(description).id}) successfully added`);
+		console.log(`[SUCCESS] Task (ID: ${this.taskManager.add(description).id}) added`);
 	}
 
 	public delete(parts: string[]): void {
@@ -25,11 +28,11 @@ export default class Commands {
 		if (isNaN(taskID)) throw 'Task ID must be a valid number!';
 		if (!this.taskManager.delete(taskID)) throw `Task (ID: ${taskID}) doesn't exist!`;
 
-		console.log(`Task (ID: ${taskID}) successfully deleted`);
+		console.log(`[SUCCESS] Task (ID: ${taskID}) deleted`);
 	}
 
-	public exit(readlineInterface: Interface): void {
-		readlineInterface.close();
+	public exit(): void {
+		this.readlineInterface.close();
 	}
 
 	public help(): void {
@@ -42,7 +45,10 @@ export default class Commands {
 
 		if (status && !isValidStatus) throw `List of available statuses - ${statusList.join(', ')}`;
 
-		this.taskManager.logTaskList(this.taskManager.getTaskList(isValidStatus ? StatusMap[status] : undefined));
+		const items = this.taskManager.getTaskList(isValidStatus ? StatusMap[status] : undefined);
+		const props = new Array<keyof Task>('description', 'status', 'createdAt', 'updatedAt');
+
+		Object.keys(items).length ? console.table(items, props) : console.log('[INFO] The task list is empty');
 	}
 
 	public mark(parts: string[]): void {
@@ -56,7 +62,7 @@ export default class Commands {
 		if (!isValidStatus) throw `List of available statuses - ${statusList.join(', ')}`;
 		if (!this.taskManager.update(taskID, StatusMap[status])) throw `Task (ID: ${taskID}) doesn't exist!`;
 
-		console.log(`Task (ID: ${taskID}) status successfully changed`);
+		console.log(`[SUCCESS] Task (ID: ${taskID}) status changed`);
 	}
 
 	public update(parts: string[]): void {
@@ -70,6 +76,8 @@ export default class Commands {
 		if (description.length > 128) throw 'Description too long!';
 		if (!this.taskManager.update(taskID, description)) throw `Task (ID: ${taskID}) doesn't exist!`;
 
-		console.log(`Task (ID: ${taskID}) description successfully updated`);
+		console.log(`[SUCCESS] Task (ID: ${taskID}) description updated`);
 	}
 }
+
+export type CommandKey = keyof Command;

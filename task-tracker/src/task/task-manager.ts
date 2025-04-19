@@ -32,7 +32,7 @@ export default class TaskManager {
 	}
 
 	public delete(taskID: Task['id']): boolean {
-		return delete this.storage.items[taskID];
+		return Object.hasOwn(this.storage.items, taskID) ? delete this.storage.items[taskID] : false;
 	}
 
 	public getTaskList(status?: Task['status']): Storage['items'] {
@@ -56,11 +56,5 @@ export default class TaskManager {
 		}
 
 		return tasks;
-	}
-
-	public logTaskList(items: Storage['items']): void {
-		const props = new Array<keyof Task>('description', 'status', 'createdAt', 'updatedAt');
-
-		console.table(items, props);
 	}
 }
