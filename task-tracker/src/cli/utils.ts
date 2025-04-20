@@ -30,6 +30,17 @@ export const parseInput = async (input: string): Promise<string[]> => {
 	return parts;
 };
 
+export const welcomeMessage = `
+┌──────────────────────────────────────────────────────────────────────────┐
+│                       Welcome to Task Tracker CLI                        │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│                       Manage your tasks with ease                        │
+│                 Type \`help\` to see available commands                    │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+`;
+
 export const userManual = `
 ┌───────────────────────────┬──────────────────────────────────────────────┐
 │ Command                   │ Description                                  │

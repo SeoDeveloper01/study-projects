@@ -12,7 +12,7 @@ export default class StorageManager {
 		return this.storage;
 	}
 
-	public saveStorage(): void {
-		writeFile(this.storage.path, JSON.stringify(this.storage));
+	public async saveStorage(): Promise<void> {
+		await writeFile(this.storage.path, JSON.stringify(this.storage));
 	}
 }
