@@ -2,6 +2,10 @@
 
 A collection of my Node.js study projects, inspired by [Roadmap.sh](https://roadmap.sh/nodejs/projects).
 
-**Projects List:**
+## Projects List:
 
--   [Task Tracker](./task-tracker/README.md) - _a CLI app to track tasks and manage to-do list_
+-   [Task Tracker](./task-tracker/README.md) - a command-line application for managing tasks and tracking to-do list
+
+<picture>
+    <img src="https://nodejs.org/static/logos/jsIconGreen.svg" alt="Node.js Logo">
+</picture>
