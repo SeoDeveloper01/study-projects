@@ -21,17 +21,24 @@ const storage = new Storage(PATH_TO_STORAGE),
 	command = new Command(readlineInterface, taskManager),
 	commandRouter = new CommandRouter(command);
 
+let isReadlineInterfaceOpen = true;
+
 readlineInterface.on('line', async (input) => {
 	try {
 		await commandRouter.exec(input);
 	} catch (error) {
 		console.error('[WARNING] ' + error);
+	} finally {
+		if (isReadlineInterfaceOpen) readlineInterface.prompt();
 	}
 });
 
 readlineInterface.on('close', async () => {
+	isReadlineInterfaceOpen = false;
 	await storageManager.saveStorage();
 	console.log('[INFO] Goodbye, have a productive day!');
 });
 
 console.log(welcomeMessage);
+
+readlineInterface.prompt();
