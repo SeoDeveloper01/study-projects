@@ -1,7 +1,8 @@
 import { createInterface } from 'node:readline/promises';
+import { isNativeError } from 'node:util/types';
 import { autocomplete, welcomeMessage } from './src/cli/utils.ts';
-import StorageManager from './src/storage/storage-manager.ts';
-import Storage from './src/storage/storage.ts';
+import TaskStorageManager from './src/storage/task-storage-manager.ts';
+import TaskStorage from './src/storage/task-storage.ts';
 import TaskManager from './src/task/task-manager.ts';
 import Task from './src/task/task.ts';
 import CommandRouter from './src/cli/command-router.ts';
@@ -15,27 +16,27 @@ const readlineInterface = createInterface({
 	completer: autocomplete
 });
 
-const storage = new Storage(PATH_TO_STORAGE),
-	storageManager = new StorageManager(storage),
+const storage = new TaskStorage(PATH_TO_STORAGE),
+	storageManager = new TaskStorageManager(storage),
 	taskManager = new TaskManager(storageManager.getStorage(), Task),
 	command = new Command(readlineInterface, taskManager),
 	commandRouter = new CommandRouter(command);
 
 let isReadlineInterfaceOpen = true;
 
-readlineInterface.on('line', async (input) => {
+readlineInterface.on('line', (input) => {
 	try {
-		await commandRouter.exec(input);
+		commandRouter.exec(input);
 	} catch (error) {
-		console.error('[WARNING] ' + error);
+		console.error('[WARNING] ' + (isNativeError(error) ? error.message : 'Unexpected error'));
 	} finally {
 		if (isReadlineInterfaceOpen) readlineInterface.prompt();
 	}
 });
 
-readlineInterface.on('close', async () => {
+readlineInterface.on('close', () => {
 	isReadlineInterfaceOpen = false;
-	await storageManager.saveStorage();
+	storageManager.saveStorage();
 	console.log('[INFO] Goodbye, have a productive day!');
 });
 

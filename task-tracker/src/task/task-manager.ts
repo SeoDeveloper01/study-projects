@@ -1,25 +1,25 @@
-import type Storage from '../storage/storage.ts';
-import { reverseStatusMap } from './task-status.ts';
+import type TaskStorage from '../storage/task-storage.ts';
+import StatusMap, { reverseStatusMap } from './task-status.ts';
 import type Task from './task.ts';
 
 export default class TaskManager {
-	private readonly storage: Storage;
+	private readonly taskStorage: TaskStorage;
 	private readonly taskConstructor: typeof Task;
 
-	public constructor(storage: Storage, taskConstructor: typeof Task) {
-		this.storage = storage;
+	public constructor(taskStorage: TaskStorage, taskConstructor: typeof Task) {
+		this.taskStorage = taskStorage;
 		this.taskConstructor = taskConstructor;
 	}
 
 	public add(description: Task['description']): Task {
-		const task = new this.taskConstructor(++this.storage.lastItemID, description, 0, Date.now());
-		this.storage.items[task.id] = task;
+		const task = new this.taskConstructor(++this.taskStorage.lastItemID, description, StatusMap.todo, Date.now());
+		this.taskStorage.items[task.id] = task;
 
 		return task;
 	}
 
 	public update(taskID: Task['id'], data: Task['description'] | Task['status']): boolean {
-		const task = this.storage.items[taskID];
+		const task = this.taskStorage.items[taskID];
 
 		if (task) {
 			typeof data === 'string' ? (task.description = data) : (task.status = data);
@@ -32,22 +32,20 @@ export default class TaskManager {
 	}
 
 	public delete(taskID: Task['id']): boolean {
-		return Object.hasOwn(this.storage.items, taskID) ? delete this.storage.items[taskID] : false;
+		return Object.hasOwn(this.taskStorage.items, taskID) ? delete this.taskStorage.items[taskID] : false;
 	}
 
-	public getTaskList(status?: Task['status']): Storage['items'] {
-		const tasks: Storage['items'] = Object.create(null);
+	public getTaskList(status?: Task['status']): TaskStorage['items'] {
+		const tasks: TaskStorage['items'] = {};
 		const timeFormat = Intl.DateTimeFormat(undefined, {
 			timeStyle: 'short',
 			dateStyle: 'short',
 			hour12: false
 		});
 
-		for (const taskID in this.storage.items) {
-			const task = this.storage.items[taskID]!;
-
+		for (const task of Object.values(this.taskStorage.items)) {
 			if (task.status === (status ?? task.status)) {
-				tasks[taskID] = Object.assign(Object.create(null), task, {
+				tasks[task.id] = Object.assign({}, task, {
 					status: reverseStatusMap[task.status],
 					createdAt: timeFormat.format(task.createdAt),
 					updatedAt: timeFormat.format(task.updatedAt)

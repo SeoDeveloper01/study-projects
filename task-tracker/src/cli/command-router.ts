@@ -1,5 +1,5 @@
 import type Command from './command.ts';
-import { commands, isCommandKey, parseInput } from './utils.ts';
+import { commandList, commandSchema, isCommandKey, parseInput } from './utils.ts';
 
 export default class CommandRouter {
 	private readonly commands: Command;
@@ -8,11 +8,11 @@ export default class CommandRouter {
 		this.commands = commands;
 	}
 
-	public async exec(input: string) {
-		const parts = await parseInput(input);
-		const command = parts[0];
+	public exec(input: string): void {
+		const parts = parseInput(input);
+		const command = parts[commandSchema.command];
 
 		if (command && isCommandKey(command)) this.commands[command](parts);
-		else throw `List of available commands - ${commands.join(', ')}`;
+		else throw new Error(`List of available commands - ${commandList.join(', ')}`);
 	}
 }

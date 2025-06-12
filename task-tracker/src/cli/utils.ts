@@ -1,25 +1,34 @@
 import type { Completer } from 'node:readline/promises';
 import type { CommandKey } from './command.ts';
 
-export const commands = new Array<CommandKey>('add', 'delete', 'exit', 'help', 'list', 'mark', 'update');
+export const commandList = new Array<CommandKey>('add', 'delete', 'exit', 'help', 'list', 'mark', 'update');
 
-export const isCommandKey = (input: string): input is CommandKey => commands.includes(input as CommandKey);
+export const commandSchema = {
+	command: 0,
+	taskID: 1,
+	statusList: 1,
+	statusMark: 2,
+	descriptionAdd: 1,
+	descriptionUpd: 2
+} as const;
 
-export const autocomplete: Completer = async (input: string) => {
+export const isCommandKey = (input: string): input is CommandKey => (commandList as string[]).includes(input);
+
+export const autocomplete: Completer = (input: string) => {
 	const match = new Array<string>();
 
-	for (let index = 0; index < commands.length; index++) {
-		if (commands[index]!.startsWith(input)) match.push(commands[index]!);
+	for (const command of commandList) {
+		if (command.startsWith(input)) match.push(command);
 	}
 
-	return [match.length ? match : commands, input];
+	return [match.length ? match : commandList, input];
 };
 
-export const parseInput = async (input: string): Promise<string[]> => {
+export const parseInput = (input: string): string[] => {
 	const parts = new Array<string>(),
 		inputLength = input.length;
 
-	for (let index = 0, start = 0; index < inputLength; index++) {
+	for (let index = 0, start: number; index < inputLength; index++) {
 		if (input[index] !== ' ') {
 			start = index;
 			while (++index < inputLength && input[index] !== ' ');

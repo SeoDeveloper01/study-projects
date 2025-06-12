@@ -1,10 +1,12 @@
 import type { Interface } from 'node:readline/promises';
 import type TaskManager from '../task/task-manager.ts';
-import { userManual } from './utils.ts';
+import { commandSchema, userManual } from './utils.ts';
 import StatusMap, { isStatusKey, statusList } from '../task/task-status.ts';
 import type Task from '../task/task.ts';
 
 export default class Command {
+	private readonly MIN_DESCIPTION_LENGTH = 1;
+	private readonly MAX_DESCIPTION_LENGTH = 128;
 	private readonly readlineInterface: Interface;
 	private readonly taskManager: TaskManager;
 
@@ -14,21 +16,21 @@ export default class Command {
 	}
 
 	public add(parts: string[]): void {
-		const description = parts.slice(1).join(' ');
+		const description = parts.slice(commandSchema.descriptionAdd).join(' ');
 
-		if (description.length === 0) throw "Description can't be empty!";
-		if (description.length > 128) throw 'Description too long!';
+		if (description.length < this.MIN_DESCIPTION_LENGTH) throw new Error("Description can't be empty!");
+		if (description.length > this.MAX_DESCIPTION_LENGTH) throw new Error('Description too long!');
 
-		console.log(`[SUCCESS] Task (ID: ${this.taskManager.add(description).id}) added`);
+		console.log(`[SUCCESS] Task (ID: ${this.taskManager.add(description).id.toString()}) added`);
 	}
 
 	public delete(parts: string[]): void {
-		const taskID = parseInt(parts[1] ?? '');
+		const taskID = parseInt(parts[commandSchema.taskID] ?? '');
 
-		if (isNaN(taskID)) throw 'Task ID must be a valid number!';
-		if (!this.taskManager.delete(taskID)) throw `Task (ID: ${taskID}) doesn't exist!`;
+		if (isNaN(taskID)) throw new Error('Task ID must be a valid number!');
+		if (!this.taskManager.delete(taskID)) throw new Error(`Task (ID: ${taskID.toString()}) doesn't exist!`);
 
-		console.log(`[SUCCESS] Task (ID: ${taskID}) deleted`);
+		console.log(`[SUCCESS] Task (ID: ${taskID.toString()}) deleted`);
 	}
 
 	public exit(): void {
@@ -40,10 +42,10 @@ export default class Command {
 	}
 
 	public list(parts: string[]): void {
-		const status = parts[1],
+		const status = parts[commandSchema.statusList],
 			isValidStatus = status && isStatusKey(status);
 
-		if (status && !isValidStatus) throw `List of available statuses - ${statusList.join(', ')}`;
+		if (status && !isValidStatus) throw new Error(`List of available statuses - ${statusList.join(', ')}`);
 
 		const items = this.taskManager.getTaskList(isValidStatus ? StatusMap[status] : undefined);
 		const props = new Array<keyof Task>('description', 'status', 'createdAt', 'updatedAt');
@@ -52,31 +54,32 @@ export default class Command {
 	}
 
 	public mark(parts: string[]): void {
-		const taskID = parseInt(parts[1] ?? '');
+		const taskID = parseInt(parts[commandSchema.taskID] ?? '');
 
-		if (isNaN(taskID)) throw 'Task ID must be a valid number!';
+		if (isNaN(taskID)) throw new Error('Task ID must be a valid number!');
 
-		const status = parts[2],
+		const status = parts[commandSchema.statusMark],
 			isValidStatus = status && isStatusKey(status);
 
-		if (!isValidStatus) throw `List of available statuses - ${statusList.join(', ')}`;
-		if (!this.taskManager.update(taskID, StatusMap[status])) throw `Task (ID: ${taskID}) doesn't exist!`;
+		if (!isValidStatus) throw new Error(`List of available statuses - ${statusList.join(', ')}`);
+		if (!this.taskManager.update(taskID, StatusMap[status]))
+			throw new Error(`Task (ID: ${taskID.toString()}) doesn't exist!`);
 
-		console.log(`[SUCCESS] Task (ID: ${taskID}) status changed`);
+		console.log(`[SUCCESS] Task (ID: ${taskID.toString()}) status changed`);
 	}
 
 	public update(parts: string[]): void {
-		const taskID = parseInt(parts[1] ?? '');
+		const taskID = parseInt(parts[commandSchema.taskID] ?? '');
 
-		if (isNaN(taskID)) throw 'Task ID must be a valid number!';
+		if (isNaN(taskID)) throw new Error('Task ID must be a valid number!');
 
-		const description = parts.slice(2).join(' ');
+		const description = parts.slice(commandSchema.descriptionUpd).join(' ');
 
-		if (description.length === 0) throw "Description can't be empty!";
-		if (description.length > 128) throw 'Description too long!';
-		if (!this.taskManager.update(taskID, description)) throw `Task (ID: ${taskID}) doesn't exist!`;
+		if (description.length < this.MIN_DESCIPTION_LENGTH) throw new Error("Description can't be empty!");
+		if (description.length > this.MAX_DESCIPTION_LENGTH) throw new Error('Description too long!');
+		if (!this.taskManager.update(taskID, description)) throw new Error(`Task (ID: ${taskID.toString()}) doesn't exist!`);
 
-		console.log(`[SUCCESS] Task (ID: ${taskID}) description updated`);
+		console.log(`[SUCCESS] Task (ID: ${taskID.toString()}) description updated`);
 	}
 }
 
