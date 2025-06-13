@@ -20,7 +20,6 @@ export default tsEslint.config([
 		rules: {
 			'array-callback-return': ['error', { checkForEach: true }],
 			'no-await-in-loop': 'warn',
-			'no-constructor-return': 'error',
 			'no-duplicate-imports': ['error', { includeExports: true }],
 			'no-promise-executor-return': 'error',
 			'no-self-compare': 'error',
@@ -69,12 +68,7 @@ export default tsEslint.config([
 			'@typescript-eslint/no-loop-func': 'error',
 			'@typescript-eslint/no-magic-numbers': [
 				'error',
-				{
-					ignore: [],
-					ignoreDefaultValues: true,
-					ignoreClassFieldInitialValues: true,
-					ignoreReadonlyClassProperties: true
-				}
+				{ ignoreClassFieldInitialValues: true, ignoreReadonlyClassProperties: true }
 			],
 			'@typescript-eslint/no-shadow': ['error', { builtinGlobals: true }],
 			'@typescript-eslint/no-unnecessary-type-conversion': 'error',

@@ -2,27 +2,32 @@ import { readFileSync, type PathLike } from 'node:fs';
 import type Task from '../task/task.ts';
 
 export default class TaskStorage {
+	private static instance: TaskStorage | null = null;
 	public readonly items: Record<Task['id'], Task> = {};
-	public readonly path: PathLike;
+	public readonly path: PathLike = 'storage.json';
 	public lastItemID: Task['id'] = 0;
 
 	public constructor(path: PathLike) {
-		//TODO: use singleton pattern
-		try {
-			const storage = JSON.parse(readFileSync(path, { encoding: 'utf-8' })) as unknown;
+		if (!TaskStorage.instance) {
+			try {
+				const storage = JSON.parse(readFileSync(path, { encoding: 'utf-8' })) as unknown;
 
-			if (!storage || typeof storage !== 'object' || !('items' in storage) || !('lastItemID' in storage))
-				throw new Error('Storage must be an valid object');
+				if (!storage || typeof storage !== 'object' || !('items' in storage) || !('lastItemID' in storage))
+					throw new Error('Storage must be an valid object');
 
-			if (this.isItems(storage.items)) this.items = storage.items;
-			if (this.isLastItemID(storage.lastItemID)) this.lastItemID = storage.lastItemID;
-		} catch {
-			this.items = {};
-			this.lastItemID = 0;
-			console.error('[WARNING] TaskStorage not found or was corrupted. A new TaskStorage will be created.');
-		} finally {
-			this.path = path;
+				if (this.isItems(storage.items)) this.items = storage.items;
+				if (this.isLastItemID(storage.lastItemID)) this.lastItemID = storage.lastItemID;
+			} catch {
+				this.items = {};
+				this.lastItemID = 0;
+				console.error('[WARNING] TaskStorage not found or was corrupted. A new TaskStorage will be created.');
+			} finally {
+				this.path = path;
+				TaskStorage.instance = this;
+			}
 		}
+
+		return TaskStorage.instance;
 	}
 
 	private isItems(items: unknown): items is typeof this.items {
