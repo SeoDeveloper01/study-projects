@@ -21,7 +21,7 @@ export const autocomplete: Completer = (input: string) => {
 		if (command.startsWith(input)) match.push(command);
 	}
 
-	return [match.length ? match : commandList, input];
+	return [match, input];
 };
 
 export const parseInput = (input: string): string[] => {

@@ -10,7 +10,7 @@ export default tsEslint.config([
 		extends: [jsEslint.configs.recommended, tsEslint.configs.strictTypeChecked, tsEslint.configs.stylisticTypeChecked],
 		linterOptions: { noInlineConfig: true },
 		languageOptions: {
-			globals: globals.node,
+			globals: globals.nodeBuiltin,
 			parser: tsEslint.parser,
 			parserOptions: {
 				projectService: true,
@@ -83,7 +83,10 @@ export default tsEslint.config([
 	},
 	{
 		name: 'testing-config',
-		languageOptions: { globals: globals.jest }
-		// TODO: complete after Jest install
+		files: ['./tests/**/*.test.ts'],
+		rules: {
+			'@typescript-eslint/no-floating-promises': 'off',
+			'@typescript-eslint/no-magic-numbers': 'off'
+		}
 	}
 ]);
