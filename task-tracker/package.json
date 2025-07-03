@@ -4,10 +4,11 @@
 	"description": "A CLI app to track tasks and manage to-do list.",
 	"main": "index.ts",
 	"scripts": {
-		"test": "node --experimental-strip-types --test ./tests/**/*.test.ts",
-		"test:watch": "node --experimental-strip-types --test --watch ./tests/**/*.test.ts",
-		"prestart": "tsc",
+		"test": "node --test --experimental-strip-types ./tests/**/*.test.ts",
+		"test:dev": "node --test --watch --experimental-strip-types ./tests/**/*.test.ts",
 		"start": "node --experimental-strip-types index.ts",
+		"start:dev": "node --watch --experimental-strip-types index.ts",
+		"prestart:dev": "tsc",
 		"lint": "eslint"
 	},
 	"repository": {
@@ -23,6 +24,9 @@
 	"homepage": "https://github.com/SeoDeveloper01/study-projects#readme",
 	"private": true,
 	"type": "module",
+	"engines": {
+		"node": ">=22.6.0"
+	},
 	"devDependencies": {
 		"@eslint/js": "^9.28.0",
 		"@types/node": "~22.14.1",
