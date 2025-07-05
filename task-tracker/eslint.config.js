@@ -85,8 +85,10 @@ export default tsEslint.config([
 		name: 'testing-config',
 		files: ['./tests/**/*.test.ts'],
 		rules: {
+			'@typescript-eslint/no-confusing-void-expression': 'off',
 			'@typescript-eslint/no-floating-promises': 'off',
-			'@typescript-eslint/no-magic-numbers': 'off'
+			'@typescript-eslint/no-magic-numbers': 'off',
+			'@typescript-eslint/no-unsafe-type-assertion': 'off'
 		}
 	}
 ]);

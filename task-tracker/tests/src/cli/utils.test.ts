@@ -11,16 +11,16 @@ suite('CLI Utils', () => {
 			deepStrictEqual(autocomplete(' 	 '), [[], ' 	 ']);
 		});
 
-		test('autocomplete for non-existent command', () => {
-			deepStrictEqual(autocomplete('non-existent-command'), [[], 'non-existent-command']);
+		test('autocomplete for unknown command', () => {
+			deepStrictEqual(autocomplete('unknown-command'), [[], 'unknown-command']);
 		});
 
-		test('should find at least 1 command', { concurrency: true }, async (testContext) => {
+		test('should find at least 1 command', async (testContext) => {
 			const testCases = new Array<Promise<void>>();
 
 			for (const command of commandList) {
 				testCases.push(
-					testContext.test(command, async () => {
+					testContext.test(command, { concurrency: true }, async () => {
 						strictEqual((await autocomplete(command[0] ?? ''))[0].length > 0, true);
 					})
 				);
