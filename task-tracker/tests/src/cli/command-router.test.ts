@@ -51,12 +51,7 @@ suite('CLI Command Router', () => {
 			return true;
 		};
 
-		throws(() => {
-			commandRouter.exec('unknown-command');
-		}, isErrorMessageValid);
-
-		throws(() => {
-			commandRouter.exec('');
-		}, isErrorMessageValid);
+		throws(() => commandRouter.exec(''), isErrorMessageValid, 'command empty');
+		throws(() => commandRouter.exec('unknown-command'), isErrorMessageValid, 'command invalid');
 	});
 });
