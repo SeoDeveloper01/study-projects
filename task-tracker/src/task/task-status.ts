@@ -10,7 +10,7 @@ export type StatusKey = keyof typeof StatusMap;
 
 export type StatusCode = (typeof StatusMap)[StatusKey];
 
-export const statusList = new Array<StatusKey>('done', 'in-progress', 'todo');
+export const statusList = new Array<StatusKey>('todo', 'in-progress', 'done');
 
 export const isStatusKey = (input: string): input is StatusKey => Object.hasOwn(StatusMap, input);
 
