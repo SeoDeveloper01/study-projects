@@ -1,5 +1,6 @@
 import type Command from './command.ts';
-import { commandList, commandSchema, isCommandKey, parseInput } from './utils.ts';
+import message from './messages.ts';
+import { commandSchema, isCommandKey, parseInput } from './utils.ts';
 
 export default class CommandRouter {
 	private readonly commands: Command;
@@ -13,6 +14,6 @@ export default class CommandRouter {
 		const command = parts[commandSchema.command];
 
 		if (command && isCommandKey(command)) this.commands[command](parts);
-		else throw new Error(`List of available commands - ${commandList.join(', ')}`);
+		else throw new Error(message.availableCommands);
 	}
 }

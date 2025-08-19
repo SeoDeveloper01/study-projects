@@ -38,28 +38,3 @@ export const parseInput = (input: string): string[] => {
 
 	return parts;
 };
-
-export const welcomeMessage = `
-┌──────────────────────────────────────────────────────────────────────────┐
-│                       Welcome to Task Tracker CLI                        │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│                       Manage your tasks with ease                        │
-│                 Type \`help\` to see available commands                    │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
-`;
-
-export const userManual = `
-┌───────────────────────────┬──────────────────────────────────────────────┐
-│ Command                   │ Description                                  │
-├───────────────────────────┼──────────────────────────────────────────────┤
-│ add {description}         │ Create a new task with the given description │
-│ update {ID} {description} │ Update the task with the specified ID        │
-│ mark {ID} {status}        │ Change status (todo, in-progress, done)      │
-│ delete {ID}               │ Delete the task with the specified ID        │
-│ list                      │ Display all tasks                            │
-│ list {status}             │ Display tasks with the given status          │
-│ exit / Ctrl+C             │ Close the CLI application                    │
-└───────────────────────────┴──────────────────────────────────────────────┘
-`;

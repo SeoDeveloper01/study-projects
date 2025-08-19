@@ -1,6 +1,7 @@
 import type TaskStorage from '../storage/task-storage.ts';
-import StatusMap, { reverseStatusMap } from './task-status.ts';
 import type Task from './task.ts';
+
+import StatusMap, { reverseStatusMap } from './task-status.ts';
 
 export default class TaskManager {
 	private readonly taskStorage: TaskStorage;

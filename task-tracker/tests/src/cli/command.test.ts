@@ -1,10 +1,11 @@
+import type { Interface } from 'node:readline/promises';
 import { deepStrictEqual, throws, strictEqual } from 'node:assert/strict';
 import { afterEach, before, mock, suite, test } from 'node:test';
-import type { Interface } from 'node:readline/promises';
+import { format } from 'node:util';
 
 import type TaskManager from '../../../src/task/task-manager.ts';
 import Command from '../../../src/cli/command.ts';
-import { userManual } from '../../../src/cli/utils.ts';
+import message, { userManual } from '../../../src/cli/messages.ts';
 import StatusMap, { statusList } from '../../../src/task/task-status.ts';
 
 suite('CLI Command', () => {
@@ -34,7 +35,7 @@ suite('CLI Command', () => {
 		afterEach(() => taskManagerAddMock.resetCalls());
 
 		test('should throw for invalid task description', () => {
-			throws(() => command.add(['add']), 'description empty');
+			throws(() => command.add(['add']), new Error(message.taskDescriptionEmpty), 'description empty');
 			throws(
 				() =>
 					command.add([
@@ -48,6 +49,7 @@ suite('CLI Command', () => {
 						'vehiculaseuismod',
 						'curabiturp'
 					]),
+				new Error(message.taskDescriptionLong),
 				'description too long'
 			);
 		});
@@ -67,13 +69,15 @@ suite('CLI Command', () => {
 		afterEach(() => taskManagerDeleteMock.resetCalls());
 
 		test('should throw for invalid task ID', () => {
-			throws(() => command.delete(['delete']), 'task ID empty');
-			throws(() => command.delete(['delete', 'one']), 'task ID not a number');
+			const expectedError = new Error(message.taskIdInvalid);
+
+			throws(() => command.delete(['delete']), expectedError, 'task ID empty');
+			throws(() => command.delete(['delete', 'one']), expectedError, 'task ID not a number');
 		});
 
 		test('should throw for unknown task ID', () => {
 			taskManagerDeleteMock.mockImplementationOnce(() => false);
-			throws(() => command.delete(['delete', '42']));
+			throws(() => command.delete(['delete', '42']), new Error(format(message.taskIdUnknown, 42)));
 		});
 
 		test('should call taskManager.delete method with correct task ID', () => {
@@ -112,7 +116,7 @@ suite('CLI Command', () => {
 		afterEach(() => taskManagerGetTaskListMock.resetCalls());
 
 		test('should throw for invalid task status', () => {
-			throws(() => command.list(['list', 'unknown-status']));
+			throws(() => command.list(['list', 'unknown-status']), new Error(message.availableStatuses));
 		});
 
 		test('should call taskManager.getTaskList method with correct task status code', async (testContext) => {
@@ -147,17 +151,19 @@ suite('CLI Command', () => {
 		afterEach(() => taskManagerUpdateMock.resetCalls());
 
 		test('should throw for invalid task ID', () => {
-			throws(() => command.mark(['mark']), 'task ID empty');
-			throws(() => command.mark(['mark', 'one']), 'task ID not a number');
+			const expectedError = new Error(message.taskIdInvalid);
+
+			throws(() => command.mark(['mark']), expectedError, 'task ID empty');
+			throws(() => command.mark(['mark', 'one']), expectedError, 'task ID not a number');
 		});
 
 		test('should throw for unknown task ID', () => {
 			taskManagerUpdateMock.mockImplementationOnce(() => false);
-			throws(() => command.mark(['mark', '42', 'in-progress']));
+			throws(() => command.mark(['mark', '42', 'in-progress']), new Error(format(message.taskIdUnknown, 42)));
 		});
 
 		test('should throw for invalid task status', () => {
-			throws(() => command.mark(['mark', '1', 'unknown-status']));
+			throws(() => command.mark(['mark', '1', 'unknown-status']), new Error(message.availableStatuses));
 		});
 
 		test('should call taskManager.update method with correct task ID and status code', async (testContext) => {
@@ -189,21 +195,27 @@ suite('CLI Command', () => {
 		afterEach(() => taskManagerUpdateMock.resetCalls());
 
 		test('should throw for invalid task ID', () => {
-			throws(() => command.update(['update']), 'task ID empty');
-			throws(() => command.update(['update', 'one']), 'task ID not a number');
+			const expectedError = new Error(message.taskIdInvalid);
+
+			throws(() => command.update(['update']), expectedError, 'task ID empty');
+			throws(() => command.update(['update', 'one']), expectedError, 'task ID not a number');
 		});
 
 		test('should throw for unknown task ID', () => {
 			taskManagerUpdateMock.mockImplementationOnce(() => false);
-			throws(() => command.update(['update', '42', 'call', 'to', 'mr.', 'John', 'Doe']));
+			throws(
+				() => command.update(['update', '42', 'call', 'to', 'mr.', 'John', 'Doe']),
+				new Error(format(message.taskIdUnknown, 42))
+			);
 		});
 
 		test('should throw for invalid task description', () => {
-			throws(() => command.update(['update', '1']), 'description empty');
+			throws(() => command.update(['update', '1']), new Error(message.taskDescriptionEmpty), 'description empty');
 			throws(
 				() =>
 					command.update([
 						'update',
+						'1',
 						'Loremipsumdolora',
 						'sitametconsectetu',
 						'adipiscingelita',
@@ -213,6 +225,7 @@ suite('CLI Command', () => {
 						'vehiculaseuismod',
 						'curabiturp'
 					]),
+				new Error(message.taskDescriptionLong),
 				'description too long'
 			);
 		});

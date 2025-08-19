@@ -1,9 +1,9 @@
-import { throws, strictEqual, deepStrictEqual, type AssertPredicate } from 'node:assert/strict';
+import { throws, strictEqual, deepStrictEqual } from 'node:assert/strict';
 import { mock, suite, test } from 'node:test';
-import { isNativeError } from 'node:util/types';
 
-import CommandRouter from '../../../src/cli/command-router.ts';
 import type Command from '../../../src/cli/command.ts';
+import CommandRouter from '../../../src/cli/command-router.ts';
+import message from '../../../src/cli/messages.ts';
 import { commandList } from '../../../src/cli/utils.ts';
 
 suite('CLI Command Router', () => {
@@ -41,17 +41,9 @@ suite('CLI Command Router', () => {
 	});
 
 	test('should throw error for unknown command', () => {
-		const isErrorMessageValid: AssertPredicate = (thrown) => {
-			if (!isNativeError(thrown)) return false;
+		const expectedError = new Error(message.availableCommands);
 
-			for (const command of commandList) {
-				if (!thrown.message.includes(command)) return false;
-			}
-
-			return true;
-		};
-
-		throws(() => commandRouter.exec(''), isErrorMessageValid, 'command empty');
-		throws(() => commandRouter.exec('unknown-command'), isErrorMessageValid, 'command invalid');
+		throws(() => commandRouter.exec(''), expectedError, 'command empty');
+		throws(() => commandRouter.exec('unknown-command'), expectedError, 'command invalid');
 	});
 });

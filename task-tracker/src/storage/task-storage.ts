@@ -1,5 +1,6 @@
 import { readFileSync, type PathLike } from 'node:fs';
 import type Task from '../task/task.ts';
+import message, { prefix } from '../cli/messages.ts';
 
 export default class TaskStorage {
 	private static readonly instances = new Map<PathLike, TaskStorage>();
@@ -20,7 +21,7 @@ export default class TaskStorage {
 			} catch {
 				this.items = {};
 				this.lastItemID = 0;
-				console.error('[WARNING] TaskStorage not found or was corrupted. A new TaskStorage will be created.');
+				console.error(`${prefix.warning} ${message.storageNotFound}`);
 			} finally {
 				this.path = path;
 				TaskStorage.instances.set(path, this);
