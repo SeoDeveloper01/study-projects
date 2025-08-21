@@ -12,7 +12,7 @@ import TaskStorageManager from './src/storage/task-storage-manager.ts';
 import Task from './src/task/task.ts';
 import TaskManager from './src/task/task-manager.ts';
 
-const PATH_TO_STORAGE = 'storage.json';
+const PATH_TO_STORAGE = process.env.PATH_TO_STORAGE ?? 'storage.json';
 
 const readlineInterface = createInterface({
 	input: process.stdin,

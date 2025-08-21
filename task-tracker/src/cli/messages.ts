@@ -4,7 +4,7 @@ import { commandList } from './utils.ts';
 export default {
 	goodbye: 'Goodbye, have a productive day!',
 	unexpectedError: 'Unexpected error',
-	storageNotFound: 'TaskStorage not found or was corrupted. A new TaskStorage will be created.',
+	storageCorrupted: 'TaskStorage was corrupted. A new TaskStorage will be created.',
 	availableCommands: `List of available commands - ${commandList.join(', ')}`,
 	availableStatuses: `List of available statuses - ${statusList.join(', ')}`,
 	taskDescriptionEmpty: "Description can't be empty!",

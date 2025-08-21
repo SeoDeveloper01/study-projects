@@ -1,4 +1,6 @@
 import { readFileSync, type PathLike } from 'node:fs';
+import { isNativeError } from 'node:util/types';
+
 import type Task from '../task/task.ts';
 import message, { prefix } from '../cli/messages.ts';
 
@@ -18,10 +20,11 @@ export default class TaskStorage {
 
 				if (this.isItems(storage.items)) this.items = storage.items;
 				if (this.isLastItemID(storage.lastItemID)) this.lastItemID = storage.lastItemID;
-			} catch {
+			} catch (error) {
 				this.items = {};
 				this.lastItemID = 0;
-				console.error(`${prefix.warning} ${message.storageNotFound}`);
+				if (!(isNativeError(error) && 'code' in error && error.code === 'ENOENT'))
+					console.error(`${prefix.warning} ${message.storageCorrupted}`);
 			} finally {
 				this.path = path;
 				TaskStorage.instances.set(path, this);
