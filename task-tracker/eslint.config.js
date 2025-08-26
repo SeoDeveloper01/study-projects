@@ -71,7 +71,6 @@ export default tsEslint.config([
 				{ ignoreClassFieldInitialValues: true, ignoreReadonlyClassProperties: true }
 			],
 			'@typescript-eslint/no-shadow': ['error', { builtinGlobals: true }],
-			'@typescript-eslint/no-unnecessary-type-conversion': 'error',
 			'@typescript-eslint/no-unsafe-type-assertion': 'warn',
 			'@typescript-eslint/no-unused-expressions': ['error', { allowTernary: true }],
 			'@typescript-eslint/no-use-before-define': 'error',

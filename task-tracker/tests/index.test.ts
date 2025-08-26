@@ -9,7 +9,7 @@ import message, { userManual, welcome } from '../src/cli/messages.ts';
 suite('Task Tracker Entry Point', () => {
 	const PATH_TO_STORAGE = './tests/e2e-storage.json';
 
-	const taskTrackerApp = spawn('node', ['--experimental-strip-types', '--no-warnings', 'index.ts'], {
+	const taskTrackerApp = spawn('node', ['--no-warnings', 'index.ts'], {
 		stdio: ['pipe', 'pipe', 'ignore'],
 		env: { PATH_TO_STORAGE },
 		windowsHide: true,
