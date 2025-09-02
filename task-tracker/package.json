@@ -9,7 +9,7 @@
 		"start": "node index.ts",
 		"start:dev": "node --watch index.ts",
 		"prestart:dev": "tsc",
-		"lint": "eslint"
+		"lint": "eslint --concurrency auto"
 	},
 	"repository": {
 		"type": "git",
