@@ -1,8 +1,9 @@
 import globals from 'globals';
 import jsEslint from '@eslint/js';
 import tsEslint from 'typescript-eslint';
+import { defineConfig } from 'eslint/config';
 
-export default tsEslint.config([
+export default defineConfig([
 	{
 		name: 'common-config',
 		files: ['**/*.{js,ts}'],

@@ -15,16 +15,16 @@ export default class TaskStorage {
 			try {
 				const storage = JSON.parse(readFileSync(path, { encoding: 'utf-8' })) as unknown;
 
-				if (!storage || typeof storage !== 'object' || !('items' in storage) || !('lastItemID' in storage))
-					throw new Error('Storage must be an valid object');
+				this.assertIsStorage(storage);
 
-				if (this.isItems(storage.items)) this.items = storage.items;
-				if (this.isLastItemID(storage.lastItemID)) this.lastItemID = storage.lastItemID;
+				this.items = storage.items;
+				this.lastItemID = storage.lastItemID;
 			} catch (error) {
-				this.items = {};
-				this.lastItemID = 0;
 				if (!(isNativeError(error) && 'code' in error && error.code === 'ENOENT'))
 					console.error(`${prefix.warning} ${message.storageCorrupted}`);
+
+				this.items = {};
+				this.lastItemID = 0;
 			} finally {
 				this.path = path;
 				TaskStorage.instances.set(path, this);
@@ -34,19 +34,16 @@ export default class TaskStorage {
 		return TaskStorage.instances.get(path) ?? this;
 	}
 
-	private isItems(items: unknown): items is typeof this.items {
-		if (!items || typeof items !== 'object') throw new Error('Items must be an object');
+	private assertIsStorage(storage: unknown): asserts storage is this {
+		if (!storage || typeof storage !== 'object' || !('items' in storage) || !('lastItemID' in storage))
+			throw new Error('Storage must be an valid object');
 
-		for (const [taskID, task] of Object.entries(items)) {
+		if (!storage.items || typeof storage.items !== 'object') throw new Error('Items must be an object');
+
+		for (const [taskID, task] of Object.entries(storage.items)) {
 			if (isNaN(parseInt(taskID)) || !task || typeof task !== 'object') throw new Error('Items was corrupted');
 		}
 
-		return true;
-	}
-
-	private isLastItemID(lastItemID: unknown): lastItemID is typeof this.lastItemID {
-		if (typeof lastItemID !== 'number') throw new Error('LastItemID must be a number');
-
-		return true;
+		if (typeof storage.lastItemID !== 'number') throw new Error('LastItemID must be a number');
 	}
 }
