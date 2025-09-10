@@ -22,4 +22,4 @@ A command-line application for managing tasks and tracking to-do list.
 
 ##
 
-_You can find [other projects here](/README.md) • For more information https://roadmap.sh/projects/task-tracker_
+_You can find [other projects here](/README.md) • For more information [Roadmap.sh](https://roadmap.sh/projects/task-tracker)_
