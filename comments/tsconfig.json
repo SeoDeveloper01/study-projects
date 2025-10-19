@@ -28,6 +28,7 @@
 		"allowUnusedLabels": false,
 		"noImplicitOverride": true,
 		"noUncheckedIndexedAccess": true,
-		"noImplicitReturns": true
+		"noImplicitReturns": true,
+		"erasableSyntaxOnly": true
 	}
 }

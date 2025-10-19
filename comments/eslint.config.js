@@ -68,6 +68,7 @@ export default defineConfig([
 			'@typescript-eslint/explicit-module-boundary-types': 'error',
 			'@typescript-eslint/method-signature-style': 'error',
 			'@typescript-eslint/no-dynamic-delete': 'off',
+			'@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
 			'@typescript-eslint/no-import-type-side-effects': 'error',
 			'@typescript-eslint/no-loop-func': 'error',
 			'@typescript-eslint/no-magic-numbers': [
