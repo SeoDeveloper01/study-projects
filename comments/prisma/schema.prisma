@@ -10,3 +10,19 @@ datasource db {
     url       = env("DATABASE_URL")
     directUrl = env("DIRECT_URL")
 }
+
+model User {
+    id       String    @id @default(cuid(2))
+    email    String    @unique
+    name     String
+    password String
+    comments Comment[]
+}
+
+model Comment {
+    id        String   @id @default(cuid(2))
+    user      User     @relation(fields: [userId], references: [id])
+    userId    String   @map("user_id")
+    text      String
+    createdAt DateTime @default(now()) @map("created_at")
+}
