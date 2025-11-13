@@ -71,10 +71,6 @@ export default defineConfig([
 			'@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
 			'@typescript-eslint/no-import-type-side-effects': 'error',
 			'@typescript-eslint/no-loop-func': 'error',
-			'@typescript-eslint/no-magic-numbers': [
-				'error',
-				{ ignoreClassFieldInitialValues: true, ignoreReadonlyClassProperties: true }
-			],
 			'@typescript-eslint/no-shadow': ['error', { builtinGlobals: true }],
 			'@typescript-eslint/no-unsafe-type-assertion': 'warn',
 			'@typescript-eslint/no-unused-expressions': ['error', { allowTernary: true }],

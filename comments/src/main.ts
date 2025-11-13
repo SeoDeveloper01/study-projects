@@ -1,7 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 
-const PORT_BY_DEFAULT = 3000;
+process.loadEnvFile();
+
 const app = await NestFactory.create(AppModule);
 
-await app.listen(process.env.PORT ?? PORT_BY_DEFAULT);
+await app.listen(process.env.PORT ?? 3000);
