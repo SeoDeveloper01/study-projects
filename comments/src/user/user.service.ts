@@ -14,46 +14,40 @@ export class UserService {
 		this.prisma = prisma;
 	}
 
-	public async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
+	public async create(createUserDto: CreateUserDto): Promise<User> {
 		return this.prisma.user.create({
 			data: {
 				email: createUserDto.email,
 				name: createUserDto.name,
 				password: createUserDto.password
-			},
-			omit: { password: true }
+			}
 		});
 	}
 
-	public async findAll(): Promise<Omit<User, 'password'>[]> {
-		return this.prisma.user.findMany({
-			omit: { password: true }
-		});
+	public async findAll(): Promise<User[]> {
+		return this.prisma.user.findMany();
 	}
 
-	public async findOne(id: string): Promise<Omit<User, 'password'> | null> {
+	public async findOne(id: string): Promise<User | null> {
 		return this.prisma.user.findUnique({
-			where: { id },
-			omit: { password: true }
+			where: { id }
 		});
 	}
 
-	public async update(id: string, updateUserDto: UpdateUserDto): Promise<Omit<User, 'password'>> {
+	public async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
 		return this.prisma.user.update({
 			where: { id },
 			data: {
 				email: updateUserDto.email,
 				name: updateUserDto.name,
 				password: updateUserDto.password
-			},
-			omit: { password: true }
+			}
 		});
 	}
 
-	public async remove(id: string): Promise<Omit<User, 'password'>> {
+	public async remove(id: string): Promise<User> {
 		return this.prisma.user.delete({
-			where: { id },
-			omit: { password: true }
+			where: { id }
 		});
 	}
 }
