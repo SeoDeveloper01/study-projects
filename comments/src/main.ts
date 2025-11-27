@@ -1,8 +1,7 @@
-import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { AppModule } from './app.module.js';
+import { NestFactory } from '@nestjs/core';
 
-process.loadEnvFile();
+import { AppModule } from './app.module.js';
 
 const app = await NestFactory.create(AppModule);
 

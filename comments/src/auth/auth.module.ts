@@ -7,12 +7,11 @@ import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 
 @Module({
-	//TODO: make secret private
 	imports: [
 		UserModule,
 		JwtModule.register({
 			global: true,
-			secret: 'TEMP-SECRET',
+			secret: process.env.SECRET,
 			signOptions: { issuer: packageJSON.name, expiresIn: 24 * 60 * 60 }
 		})
 	],
