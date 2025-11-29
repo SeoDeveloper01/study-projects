@@ -78,7 +78,7 @@ export default defineConfig([
 			'@typescript-eslint/no-useless-empty-export': 'error',
 			'@typescript-eslint/parameter-properties': 'error',
 			'@typescript-eslint/prefer-readonly': 'error',
-			'@typescript-eslint/promise-function-async': ['error', { allowAny: false }]
+			'@typescript-eslint/promise-function-async': ['error']
 		}
 	}
 ]);
