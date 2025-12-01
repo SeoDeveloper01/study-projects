@@ -25,4 +25,5 @@ model Comment {
     userId    String   @map("user_id")
     text      String
     createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 }
