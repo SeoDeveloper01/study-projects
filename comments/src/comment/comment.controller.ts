@@ -1,10 +1,16 @@
-import { Controller, Delete, Get, Param, Patch, Post, Body as ReqBody } from '@nestjs/common';
+import { Controller, Delete, Param, Patch, Post, Req, Body as ReqBody, UseGuards } from '@nestjs/common';
 
+import type { RequestWithJwtPayload } from '../auth/interfaces/req-with-payload.interface.js';
+import type { CommentWithUser } from './interfaces/comment-with-user.interface.js';
+
+import { AuthGuard } from '../auth/auth.guard.js';
 import { CommentService } from './comment.service.js';
 import { CreateCommentDto } from './dto/create-comment.dto.js';
 import { UpdateCommentDto } from './dto/update-comment.dto.js';
+import { CommentOwnerGuard } from './guards/comment-owner.guard.js';
 
 @Controller('comment')
+@UseGuards(AuthGuard)
 export class CommentController {
 	private readonly commentService: CommentService;
 
@@ -13,27 +19,22 @@ export class CommentController {
 	}
 
 	@Post()
-	public create(@ReqBody() createCommentDto: CreateCommentDto): string {
-		return this.commentService.create(createCommentDto);
-	}
-
-	@Get()
-	public findAll(): string {
-		return this.commentService.findAll();
-	}
-
-	@Get(':id')
-	public findOne(@Param('id') id: string): string {
-		return this.commentService.findOne(id);
+	public async create(
+		@ReqBody() createCommentDto: CreateCommentDto,
+		@Req() { jwtPayload }: RequestWithJwtPayload
+	): Promise<CommentWithUser> {
+		return this.commentService.create(jwtPayload.sub, createCommentDto);
 	}
 
 	@Patch(':id')
-	public update(@Param('id') id: string, @ReqBody() updateCommentDto: UpdateCommentDto): string {
+	@UseGuards(CommentOwnerGuard)
+	public async update(@Param('id') id: string, @ReqBody() updateCommentDto: UpdateCommentDto): Promise<CommentWithUser> {
 		return this.commentService.update(id, updateCommentDto);
 	}
 
 	@Delete(':id')
-	public remove(@Param('id') id: string): string {
+	@UseGuards(CommentOwnerGuard)
+	public async remove(@Param('id') id: string): Promise<CommentWithUser> {
 		return this.commentService.remove(id);
 	}
 }
