@@ -3,7 +3,7 @@ import { Controller, Delete, Param, Patch, Post, Req, Body as ReqBody, UseGuards
 import type { RequestWithJwtPayload } from '../auth/interfaces/req-with-payload.interface.js';
 import type { CommentWithUser } from './interfaces/comment-with-user.interface.js';
 
-import { AuthGuard } from '../auth/auth.guard.js';
+import { AuthGuard } from '../auth/guards/auth.guard.js';
 import { CommentService } from './comment.service.js';
 import { CreateCommentDto } from './dto/create-comment.dto.js';
 import { UpdateCommentDto } from './dto/update-comment.dto.js';
