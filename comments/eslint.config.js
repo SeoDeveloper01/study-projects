@@ -74,6 +74,7 @@ export default defineConfig([
 			'@typescript-eslint/no-shadow': ['error', { builtinGlobals: true }],
 			'@typescript-eslint/no-unsafe-type-assertion': 'warn',
 			'@typescript-eslint/no-unused-expressions': ['error', { allowTernary: true }],
+			'@typescript-eslint/no-unused-private-class-members': 'error',
 			'@typescript-eslint/no-use-before-define': 'error',
 			'@typescript-eslint/no-useless-empty-export': 'error',
 			'@typescript-eslint/parameter-properties': 'error',
