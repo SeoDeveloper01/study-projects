@@ -1,10 +1,10 @@
 import type { Interface } from 'node:readline/promises';
 import { format } from 'node:util';
 
-import type Task from '../task/task.ts';
 import type TaskManager from '../task/task-manager.ts';
-
 import StatusMap, { isStatusKey } from '../task/task-status.ts';
+import type { ITask } from '../task/task.ts';
+
 import message, { prefix, userManual } from './messages.ts';
 import { commandSchema } from './utils.ts';
 
@@ -13,6 +13,7 @@ export default class Command {
 	private readonly MAX_DESCIPTION_LENGTH = 128;
 	private readonly readlineInterface: Interface;
 	private readonly taskManager: TaskManager;
+	private readonly props: (keyof ITask)[] = ['description', 'status', 'createdAt', 'updatedAt'];
 
 	public constructor(readlineInterface: Interface, taskManager: TaskManager) {
 		this.readlineInterface = readlineInterface;
@@ -52,9 +53,10 @@ export default class Command {
 		if (status && !isValidStatus) throw new Error(message.availableStatuses);
 
 		const items = this.taskManager.getTaskList(isValidStatus ? StatusMap[status] : undefined);
-		const props = new Array<keyof Task>('description', 'status', 'createdAt', 'updatedAt');
 
-		Object.keys(items).length ? console.table(items, props) : console.log(`${prefix.info} ${message.taskListEmpty}`);
+		Object.keys(items).length
+			? console.table(items, this.props)
+			: console.log(`${prefix.info} ${message.taskListEmpty}`);
 	}
 
 	public mark(parts: string[]): void {
