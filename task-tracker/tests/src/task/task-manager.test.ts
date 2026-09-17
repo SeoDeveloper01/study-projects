@@ -43,7 +43,7 @@ suite('Task Manager', () => {
 				id: 1,
 				description: 'call to mr. John Doe',
 				status: StatusMap.todo
-			} as ITask);
+			});
 
 			ok(newTask.createdAt === newTask.updatedAt, 'created and updated time initially must be equal');
 			ok(newTask.createdAt >= timeStamp, 'created time must be greater or equal to time stamp');
