@@ -1,8 +1,8 @@
-import { throws, strictEqual, deepStrictEqual } from 'node:assert/strict';
+import { deepStrictEqual, strictEqual, throws } from 'node:assert/strict';
 import { mock, suite, test } from 'node:test';
 
-import type Command from '../../../src/cli/command.ts';
 import CommandRouter from '../../../src/cli/command-router.ts';
+import type Command from '../../../src/cli/command.ts';
 import message from '../../../src/cli/messages.ts';
 import { commandList } from '../../../src/cli/utils.ts';
 
