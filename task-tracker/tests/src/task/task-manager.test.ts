@@ -1,29 +1,37 @@
-import { ok, partialDeepStrictEqual, strictEqual } from 'node:assert/strict';
-import { test, suite, mock, afterEach, beforeEach } from 'node:test';
+import { deepStrictEqual, ok, partialDeepStrictEqual, strictEqual } from 'node:assert/strict';
+import { unlink } from 'node:fs/promises';
+import { DatabaseSync } from 'node:sqlite';
+import { after, beforeEach, suite, test } from 'node:test';
 
-import type TaskStorage from '../../../src/storage/task-storage.ts';
-import Task from '../../../src/task/task.ts';
+import TaskStorage from '../../../src/storage/task-storage.ts';
 import TaskManager from '../../../src/task/task-manager.ts';
 import StatusMap, { statusList } from '../../../src/task/task-status.ts';
+import CreateTaskDTO, { type ITask } from '../../../src/task/task.ts';
 
 suite('Task Manager', () => {
-	const taskStorageMock = {
-		items: {},
-		path: '',
-		lastItemID: 0
-	} as TaskStorage;
+	const PATH_TO_STORAGE = './tests/src/task/storage.db';
 
-	const taskConstructorMock = mock.fn(Task);
+	const sqlite = new DatabaseSync(PATH_TO_STORAGE);
+	const taskStorage = new TaskStorage(sqlite);
+	const taskManager = new TaskManager(taskStorage, CreateTaskDTO);
 
-	const taskManager = new TaskManager(taskStorageMock, taskConstructorMock);
+	const getTaskById = (taskId: ITask['id']): ITask | undefined => {
+		const select = sqlite.prepare(`
+			SELECT *
+			FROM task
+			WHERE id = $id	
+		`);
 
-	afterEach(() => {
-		for (const taskId of Object.keys(taskStorageMock.items)) {
-			delete taskStorageMock.items[+taskId];
-		}
+		return select.get({ id: taskId }) as unknown as ITask;
+	};
 
-		taskConstructorMock.mock.resetCalls();
-		taskStorageMock.lastItemID = 0;
+	beforeEach(() => {
+		sqlite.exec('DELETE FROM task');
+	});
+
+	after(() => {
+		sqlite.close();
+		unlink(PATH_TO_STORAGE);
 	});
 
 	suite('add method', () => {
@@ -32,35 +40,26 @@ suite('Task Manager', () => {
 			const newTask = taskManager.add('call to mr. John Doe');
 
 			partialDeepStrictEqual(newTask, {
-				id: taskStorageMock.lastItemID,
+				id: 1,
 				description: 'call to mr. John Doe',
 				status: StatusMap.todo
-			} as Task);
+			});
 
 			ok(newTask.createdAt === newTask.updatedAt, 'created and updated time initially must be equal');
 			ok(newTask.createdAt >= timeStamp, 'created time must be greater or equal to time stamp');
-			ok(newTask instanceof Task);
 		});
 
-		test('should save new task to taskStorage.items', () => {
+		test('should save new task to storage.db', () => {
 			const newTask1 = taskManager.add('call to mr. John Doe');
 			const newTask2 = taskManager.add('go for a run');
 
-			strictEqual(taskStorageMock.items[newTask1.id], newTask1);
-			strictEqual(taskStorageMock.items[newTask2.id], newTask2);
-		});
-
-		test('should increment taskStorage.lastItemID', () => {
-			const lastItemIdBeforeAddCall = taskStorageMock.lastItemID;
-			const newTask = taskManager.add('call to mr. John Doe');
-
-			strictEqual(taskStorageMock.lastItemID, lastItemIdBeforeAddCall + 1);
-			strictEqual(newTask.id, lastItemIdBeforeAddCall + 1);
+			deepStrictEqual(getTaskById(newTask1.id), newTask1);
+			deepStrictEqual(getTaskById(newTask2.id), newTask2);
 		});
 	});
 
 	suite('update method', () => {
-		let newTask: Task;
+		let newTask: ITask;
 
 		beforeEach(() => {
 			newTask = taskManager.add('call to mr. John Doe');
@@ -68,42 +67,42 @@ suite('Task Manager', () => {
 
 		test('should update task description for string input', () => {
 			ok(taskManager.update(newTask.id, 'new description'));
-			strictEqual(newTask.description, 'new description');
+			strictEqual(getTaskById(newTask.id)?.description, 'new description');
 		});
 
 		test('should update task status for number input', () => {
 			ok(taskManager.update(newTask.id, StatusMap['in-progress']));
-			strictEqual(newTask.status, StatusMap['in-progress']);
+			strictEqual(getTaskById(newTask.id)?.status, StatusMap['in-progress']);
 		});
 
 		test('should change updated time', () => {
 			let timeStamp = Date.now();
 
 			taskManager.update(newTask.id, 'new description');
-			ok(newTask.updatedAt >= timeStamp);
+			ok((getTaskById(newTask.id)?.updatedAt ?? 0) >= timeStamp);
 
 			timeStamp = Date.now();
 
 			taskManager.update(newTask.id, StatusMap['in-progress']);
-			ok(newTask.updatedAt >= timeStamp);
+			ok((getTaskById(newTask.id)?.updatedAt ?? 0) >= timeStamp);
 		});
 
 		test('should return false for unknown task ID', () => {
-			ok(!taskManager.update(taskStorageMock.lastItemID + 1, 'new description'));
+			ok(!taskManager.update(newTask.id + 1, 'new description'));
 		});
 	});
 
 	suite('delete method', () => {
-		let newTask: Task;
+		let newTask: ITask;
 
 		beforeEach(() => {
 			newTask = taskManager.add('call to mr. John Doe');
 		});
 
 		test('should delete the specified task from Task Storage', () => {
-			strictEqual(taskStorageMock.items[newTask.id], newTask);
+			deepStrictEqual(getTaskById(newTask.id), newTask, 'must exist before deletion');
 			taskManager.delete(newTask.id);
-			strictEqual(taskStorageMock.items[newTask.id], undefined);
+			strictEqual(getTaskById(newTask.id), undefined);
 		});
 
 		test('should return true for valid task ID', () => {
@@ -111,26 +110,43 @@ suite('Task Manager', () => {
 		});
 
 		test('should return false for unknown task ID', () => {
-			ok(!taskManager.delete(taskStorageMock.lastItemID + 1));
+			ok(!taskManager.delete(newTask.id + 1));
 		});
 	});
 
 	suite('getTaskList method', () => {
+		let newTask1: ITask, newTask2: ITask, newTask3: ITask;
+
 		beforeEach(() => {
-			taskManager.add('first task');
-			taskManager.add('second task').status = StatusMap['in-progress'];
-			taskManager.add('third task').status = StatusMap.done;
+			newTask1 = taskManager.add('first task');
+			newTask2 = taskManager.add('second task');
+			newTask3 = taskManager.add('third task');
+
+			taskManager.update(newTask2.id, StatusMap['in-progress']);
+			taskManager.update(newTask3.id, StatusMap.done);
 		});
 
 		test('should return all tasks when status not specified', () => {
 			const taskList = taskManager.getTaskList();
 
-			ok(Object.keys(taskList).length === Object.keys(taskStorageMock.items).length);
+			ok(Object.keys(taskList).length === 3);
 
 			partialDeepStrictEqual(taskList, {
-				1: { id: 1, description: 'first task', status: statusList[StatusMap.todo] },
-				2: { id: 2, description: 'second task', status: statusList[StatusMap['in-progress']] },
-				3: { id: 3, description: 'third task', status: statusList[StatusMap.done] }
+				[newTask1.id]: {
+					id: newTask1.id,
+					description: 'first task',
+					status: statusList[StatusMap.todo]
+				},
+				[newTask2.id]: {
+					id: newTask2.id,
+					description: 'second task',
+					status: statusList[StatusMap['in-progress']]
+				},
+				[newTask3.id]: {
+					id: newTask3.id,
+					description: 'third task',
+					status: statusList[StatusMap.done]
+				}
 			});
 		});
 

@@ -1,49 +1,68 @@
-import { readFileSync, type PathLike } from 'node:fs';
-import { isNativeError } from 'node:util/types';
+import { writeFileSync, type PathLike } from 'node:fs';
+import type { DatabaseSync, StatementSync } from 'node:sqlite';
 
-import type Task from '../task/task.ts';
 import message, { prefix } from '../cli/messages.ts';
+import type { ITask } from '../task/task.ts';
+import query from './task-storage-queries.ts';
 
 export default class TaskStorage {
 	private static readonly instances = new Map<PathLike, TaskStorage>();
-	public readonly items: Record<Task['id'], Task> = {};
-	public readonly path: PathLike = 'storage.json';
-	public lastItemID: Task['id'] = 0;
 
-	public constructor(path: PathLike) {
-		if (!TaskStorage.instances.has(path)) {
-			try {
-				const storage = JSON.parse(readFileSync(path, { encoding: 'utf-8' })) as unknown;
+	private readonly findAllStatement!: StatementSync;
+	private readonly findStatement!: StatementSync;
+	private readonly createStatement!: StatementSync;
+	private readonly updateDescriptionStatement!: StatementSync;
+	private readonly updateStatusStatement!: StatementSync;
+	private readonly deleteStatement!: StatementSync;
 
-				this.assertIsStorage(storage);
+	public constructor(db: DatabaseSync) {
+		const path = db.location() ?? ':memory:';
+		const storage = TaskStorage.instances.get(path);
 
-				this.items = storage.items;
-				this.lastItemID = storage.lastItemID;
-			} catch (error) {
-				if (!(isNativeError(error) && 'code' in error && error.code === 'ENOENT'))
-					console.error(`${prefix.warning} ${message.storageCorrupted}`);
+		if (storage) return storage;
 
-				this.items = {};
-				this.lastItemID = 0;
-			} finally {
-				this.path = path;
-				TaskStorage.instances.set(path, this);
-			}
+		try {
+			db.exec(query.CREATE_TABLE);
+		} catch (error) {
+			if (Error.isError(error) && 'code' in error && error.code === 'ERR_SQLITE_ERROR')
+				console.error(`${prefix.warning} ${message.storageCorrupted}`);
+
+			if (path !== ':memory:') writeFileSync(path, '');
+
+			db.exec(query.CREATE_TABLE);
+		} finally {
+			this.findAllStatement = db.prepare(query.SELECT_ALL);
+			this.findStatement = db.prepare(query.SELECT);
+			this.createStatement = db.prepare(query.INSERT);
+			this.updateDescriptionStatement = db.prepare(query.UPDATE_DESCRIPTION);
+			this.updateStatusStatement = db.prepare(query.UPDATE_STATUS);
+			this.deleteStatement = db.prepare(query.DELETE);
+
+			TaskStorage.instances.set(path, this);
 		}
-
-		return TaskStorage.instances.get(path) ?? this;
 	}
 
-	private assertIsStorage(storage: unknown): asserts storage is this {
-		if (!storage || typeof storage !== 'object' || !('items' in storage) || !('lastItemID' in storage))
-			throw new Error('Storage must be an valid object');
+	public findAll(): ITask[] {
+		return this.findAllStatement.all() as unknown as ITask[];
+	}
 
-		if (!storage.items || typeof storage.items !== 'object') throw new Error('Items must be an object');
+	public find(status: ITask['status']): ITask[] {
+		return this.findStatement.all({ status }) as unknown as ITask[];
+	}
 
-		for (const [taskID, task] of Object.entries(storage.items)) {
-			if (isNaN(parseInt(taskID)) || !task || typeof task !== 'object') throw new Error('Items was corrupted');
-		}
+	public create(data: Omit<ITask, 'id'>): ITask {
+		return this.createStatement.get(data) as unknown as ITask;
+	}
 
-		if (typeof storage.lastItemID !== 'number') throw new Error('LastItemID must be a number');
+	public updateDescription(data: Pick<ITask, 'id' | 'description' | 'updatedAt'>): boolean {
+		return Boolean(this.updateDescriptionStatement.run(data).changes);
+	}
+
+	public updateStatus(data: Pick<ITask, 'id' | 'status' | 'updatedAt'>): boolean {
+		return Boolean(this.updateStatusStatement.run(data).changes);
+	}
+
+	public delete(id: ITask['id']): boolean {
+		return Boolean(this.deleteStatement.run({ id }).changes);
 	}
 }

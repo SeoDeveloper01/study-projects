@@ -1,5 +1,5 @@
 import { deepStrictEqual, ok } from 'node:assert/strict';
-import { test, suite } from 'node:test';
+import { suite, test } from 'node:test';
 
 import StatusMap, { isStatusKey, statusList } from '../../../src/task/task-status.ts';
 
