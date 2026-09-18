@@ -1,11 +1,11 @@
+import { deepStrictEqual, strictEqual, throws } from 'node:assert/strict';
 import type { Interface } from 'node:readline/promises';
-import { deepStrictEqual, throws, strictEqual } from 'node:assert/strict';
 import { afterEach, before, mock, suite, test } from 'node:test';
 import { format } from 'node:util';
 
-import type TaskManager from '../../../src/task/task-manager.ts';
 import Command from '../../../src/cli/command.ts';
 import message, { userManual } from '../../../src/cli/messages.ts';
+import type TaskManager from '../../../src/task/task-manager.ts';
 import StatusMap, { statusList } from '../../../src/task/task-status.ts';
 
 suite('CLI Command', () => {
@@ -21,7 +21,10 @@ suite('CLI Command', () => {
 	} satisfies Partial<TaskManager>;
 
 	const consoleLogMock = mock.method(console, 'log', () => undefined).mock;
-	const command = new Command(readlineInterfaceMock as unknown as Interface, taskManagerMock as unknown as TaskManager);
+	const command = new Command(
+		readlineInterfaceMock as unknown as Interface,
+		taskManagerMock as unknown as TaskManager
+	);
 
 	suite('add method', () => {
 		const taskManagerAddMock = taskManagerMock.add.mock;
